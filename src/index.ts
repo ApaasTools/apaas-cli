@@ -14,7 +14,7 @@ const program = new Command();
 
 program
   .name('apaas')
-  .description('APAAS 脚手架 CLI（TypeScript 版本）')
+  .description('Apaas CLI')
   .version('0.0.1')
   .usage('<command> [option]');
 

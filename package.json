@@ -1,7 +1,7 @@
 {
   "name": "apaas-cli",
   "version": "0.0.1",
-  "description": "APAAS 脚手架 CLI（TypeScript 版本）",
+  "description": "Apaas CLI",
   "private": false,
   "bin": {
     "apaas": "./dist/index.js"
