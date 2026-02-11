@@ -5,6 +5,8 @@ import { Command } from 'commander';
 import { registerInitCommand } from './commands/init';
 import { registerInstallCommand } from './commands/install';
 import { registerBuildCommand } from './commands/build';
+import { registerSetCommand } from './commands/set';
+import { registerConfigCommand } from './commands/config';
 import { outputWarning } from './utils/warning';
 
 const program = new Command();
@@ -18,6 +20,8 @@ program
 registerInitCommand(program);
 registerBuildCommand(program);
 registerInstallCommand(program);
+registerSetCommand(program);
+registerConfigCommand(program);
 
 program
   .command('doctor')
@@ -32,4 +36,3 @@ if (!program.args || program.args.length === 0) {
   outputWarning();
   program.help();
 }
-

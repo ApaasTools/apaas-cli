@@ -7,11 +7,7 @@ import inquirer from 'inquirer';
 
 import { log } from '../utils/log';
 import { outputWarning } from '../utils/warning';
-
-const WEB_GIT_PROJECT_URL =
-  'https://gitee.com/shiyutian/apaas-custom-vue-starter.git';
-const MOBILE_GIT_PROJECT_URL =
-  'https://gitee.com/tangwei-trevor/apaas-custom-mobile-starter.git';
+import { loadConfig, type TemplateKind } from '../config';
 
 type InitOptions = {
   version?: string;
@@ -46,7 +42,7 @@ export function registerInitCommand(program: Command) {
   program
     .command('init <name>')
     .description('初始化项目')
-    .option('-v, --version <version>', '模板 git 分支/Tag')
+    .option('-v, --version <version>', '模板 git 分支/Tag（可选）')
     .option('-u, --userhome <userhome>', '自定义缓存目录（用于存放模板仓库缓存）')
     .action(async (name: string, options: InitOptions) => {
       outputWarning();
@@ -56,14 +52,24 @@ export function registerInitCommand(program: Command) {
           type: 'list',
           message: '请选择将要创建的项目类型：',
           name: 'projectType',
-          choices: ['Web', 'Mobile'],
-          default: 'Web',
+          choices: [
+            { name: 'monorepo集合', value: 'monorepo' },
+            { name: '普通项目', value: 'normal' },
+          ],
+          default: 'normal',
         },
       ]);
 
-      const projectType: 'Web' | 'Mobile' = answers.projectType;
-      const gitProjectUrl =
-        projectType === 'Web' ? WEB_GIT_PROJECT_URL : MOBILE_GIT_PROJECT_URL;
+      const projectType = answers.projectType as TemplateKind;
+      const config = loadConfig();
+      const gitProjectUrl = config.templates[projectType];
+
+      if (!gitProjectUrl || !gitProjectUrl.trim()) {
+        log.error(
+          `error 未配置模板仓库地址：${projectType}。请先执行 apaas set 进行配置。`
+        );
+        shelljs.exit(1);
+      }
 
       if (!shelljs.which('git')) {
         log.error('error 本机上没有git，请检查git是否安装或相关环境变量是否正确');
@@ -135,4 +141,3 @@ export function registerInitCommand(program: Command) {
       outputWarning();
     });
 }
-
