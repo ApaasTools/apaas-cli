@@ -7,103 +7,15 @@ import { spawn } from 'node:child_process';
 
 import { outputWarning } from '../utils/warning';
 import { log } from '../utils/log';
-
-type ApaasJson = {
-  entry: string;
-  copyAssets: string[];
-  outputName: string;
-  customWidgetList?: Array<{ code: string; text: string }>;
-  [k: string]: unknown;
-};
-
-function resolveAbs(p: string) {
-  return path.isAbsolute(p) ? p : path.resolve(process.cwd(), p);
-}
-
-function exitWithError(message: string): never {
-  log.error(message);
-  process.exitCode = 1;
-  throw new Error(message);
-}
-
-function ensureDirExists(dirPath: string) {
-  if (!fs.existsSync(dirPath)) {
-    exitWithError(`模块目录不存在：${dirPath}`);
-  }
-  if (!fs.lstatSync(dirPath).isDirectory()) {
-    exitWithError(`模块路径不是目录：${dirPath}`);
-  }
-}
-
-function readJsonFile<T>(filePath: string): T {
-  if (!fs.existsSync(filePath)) {
-    exitWithError(`找不到配置文件：${filePath}`);
-  }
-  try {
-    return JSON.parse(fs.readFileSync(filePath, 'utf-8')) as T;
-  } catch (e) {
-    exitWithError(`配置文件解析失败：${filePath}`);
-  }
-}
-
-function validateEntry(moduleDir: string, entry: string) {
-  const entryPath = path.isAbsolute(entry)
-    ? entry
-    : path.resolve(moduleDir, entry);
-
-  if (!fs.existsSync(entryPath)) {
-    exitWithError(
-      `apaas.json 指定的 entry: ${entry} 的路径错误\nerror path is ${entryPath}`
-    );
-  }
-
-  return entryPath;
-}
-
-function findRslibConfig(startDir: string) {
-  const candidates = [
-    'rslib.config.ts',
-    'rslib.config.js',
-    'rslib.config.cjs',
-    'rslib.config.mjs',
-  ];
-
-  let current = startDir;
-  for (let depth = 0; depth < 4; depth++) {
-    for (const name of candidates) {
-      const p = path.resolve(current, name);
-      if (fs.existsSync(p)) {
-        if (depth > 0) {
-          log.info(`在上级目录找到 rslib 配置文件: ${p} (向上 ${depth} 层)`);
-        }
-        return p;
-      }
-    }
-
-    const parent = path.dirname(current);
-    if (parent === current) break;
-    current = parent;
-  }
-
-  return null;
-}
-
-function buildRslibArgsWithWatch(moduleDir: string, forwardedArgs: string[]) {
-  const args = ['rslib', 'build'];
-
-  const configPath = findRslibConfig(moduleDir);
-  if (configPath) {
-    args.push('-c', configPath);
-  }
-
-  args.push('-w');
-
-  if (forwardedArgs.length > 0) {
-    args.push(...forwardedArgs);
-  }
-
-  return args;
-}
+import {
+  type ApaasJson,
+  resolveAbs,
+  ensureDirExists,
+  readJsonFile,
+  validateEntry,
+  buildRslibArgs,
+  resolveDistRoot,
+} from '../utils/apaasModule';
 
 function extractForwardedArgs(rawArgv: string[], extracted: { name?: string }) {
   const forwarded: string[] = [];
@@ -154,22 +66,26 @@ export function registerRunCommand(program: Command) {
 
         const configName = extracted.name ?? 'apaas.json';
         if (!configName.endsWith('.json')) {
-          exitWithError(`--name 必须是 .json 文件名：${configName}`);
+          throw new Error(`--name 必须是 .json 文件名：${configName}`);
         }
 
         const configPath = path.resolve(absModuleDir, configName);
         const apaasConfig = readJsonFile<ApaasJson>(configPath);
 
         if (!apaasConfig.entry || typeof apaasConfig.entry !== 'string') {
-          exitWithError(`配置文件缺少有效的 entry 字段：${configPath}`);
+          throw new Error(`配置文件缺少有效的 entry 字段：${configPath}`);
         }
         if (!apaasConfig.outputName || typeof apaasConfig.outputName !== 'string') {
-          exitWithError(`配置文件缺少有效的 outputName 字段：${configPath}`);
+          throw new Error(`配置文件缺少有效的 outputName 字段：${configPath}`);
         }
 
         const entryAbsPath = validateEntry(absModuleDir, apaasConfig.entry);
 
-        const staticDir = path.resolve(process.cwd(), 'zip', apaasConfig.outputName);
+        const { distRoot: staticDir } = await resolveDistRoot(
+          absModuleDir,
+          apaasConfig.outputName,
+        );
+
         if (!fs.existsSync(staticDir)) {
           fs.mkdirSync(staticDir, { recursive: true });
         }
@@ -202,6 +118,7 @@ async function startServer(params: {
   const clients = new Set<express.Response>();
 
   app.use(cors());
+  console.info("staticDir",staticDir)
   // 旧写法，为了兼容旧插件
   app.use(express.static(staticDir));
   // 新写法
@@ -243,7 +160,11 @@ async function startServer(params: {
 
     log.info(`静态资源目录: ${staticDir}`);
 
-    const rslibArgs = buildRslibArgsWithWatch(absModuleDir, forwardedArgs);
+    const rslibArgs = buildRslibArgs({
+      moduleDir: absModuleDir,
+      watch: true,
+      forwardedArgs,
+    });
     log.info(`构建命令: npx ${rslibArgs.join(' ')}`);
 
     const buildProcess = startBuild({
@@ -372,4 +293,3 @@ async function watchBuildOutput(params: {
 
   return watcher;
 }
-
