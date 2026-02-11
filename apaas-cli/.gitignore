@@ -1,0 +1,42 @@
+.DS_Store
+node_modules
+/dist
+
+/tests/e2e/reports/
+selenium-debug.log
+chromedriver.log
+geckodriver.log
+
+# local env files
+.env.local
+.env.*.local
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.zip
+apaas-custom-crmApaasProject.zip
+
+# build
+/apaas-custom-crmApaas*
+/apaas-custom-CRMtable*
+/apaas-custom-engineC*
+/apaas-custom-fileUploadT*
+/apaas-custom-widge*
+/apaas-custom-crmQueryBread*
+/apaas-custom-list-search*
+/apaas-custom-crmCustomPage*
+/apaas-custom-layout*
+
+
+/https

@@ -1,0 +1,38 @@
+{
+  "name": "apaas-cli",
+  "version": "0.0.1",
+  "description": "APAAS 脚手架 CLI（TypeScript 版本）",
+  "private": false,
+  "bin": {
+    "apaas": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "ts-node src/index.ts",
+    "start": "node dist/index.js"
+  },
+  "keywords": [
+    "cli",
+    "apaas",
+    "typescript"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.0.0",
+    "shelljs": "^0.8.5",
+    "inquirer": "^8.2.0",
+    "colors": "^1.4.0",
+    "cross-spawn": "^7.0.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "ts-node": "^10.9.2",
+    "@types/node": "^22.0.0",
+    "@types/commander": "^2.12.2",
+    "@types/shelljs": "^0.8.15",
+    "@types/inquirer": "^8.2.10",
+    "@types/cross-spawn": "^6.0.6",
+    "@types/colors": "^1.2.4"
+  }
+}
+
