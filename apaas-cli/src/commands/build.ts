@@ -115,7 +115,6 @@ function buildRslibArgs(moduleDir: string) {
   // rslib 可能不会按预期从 cwd 自动搜到配置，导致报 rslib.config not found。
   // 这里如果模块目录下存在任意 rslib.config.*，则显式传 -c，避免 rslib 自行探测失败。
   if (configPath) {
-    console.log("buildRslibArgs", args)
     args.push('-c', configPath);
   }
 
@@ -182,7 +181,7 @@ export function registerBuildCommand(program: Command) {
         const outputZipPath = path.resolve(zipRoot, `${outputName}.zip`);
 
         // rslib 默认会在 cwd 下生成 dist/（或其默认输出目录）。这里记录一下用于构建完成后的清理。
-        const rslibDefaultOutputPath = path.resolve(absModuleDir, outputName);
+        const rslibDefaultOutputPath = path.resolve(absModuleDir, 'dist');
 
         // 清理目标路径
         if (fs.existsSync(outputPath)) {

@@ -7,6 +7,7 @@ import { registerInstallCommand } from './commands/install';
 import { registerBuildCommand } from './commands/build';
 import { registerSetCommand } from './commands/set';
 import { registerConfigCommand } from './commands/config';
+import { registerRunCommand } from './commands/run';
 import { outputWarning } from './utils/warning';
 
 const program = new Command();
@@ -19,6 +20,7 @@ program
 
 registerInitCommand(program);
 registerBuildCommand(program);
+registerRunCommand(program);
 registerInstallCommand(program);
 registerSetCommand(program);
 registerConfigCommand(program);
