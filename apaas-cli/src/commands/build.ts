@@ -67,7 +67,7 @@ export function registerBuildCommand(program: Command) {
     .command("build <moduleDir>")
     .description("根据模块目录与 apaas.json 构建自定义模块")
     .option("-n, --name <name>", "配置文件名（默认 apaas.json）")
-    .action((moduleDir: string, options: { name?: string }) => {
+    .action(async (moduleDir: string, options: { name?: string }) => {
       outputWarning();
 
       try {
@@ -103,8 +103,10 @@ export function registerBuildCommand(program: Command) {
         const outputPath = path.resolve(zipRoot, outputName);
         const outputZipPath = path.resolve(zipRoot, `${outputName}.zip`);
 
-        // rslib 默认会在 cwd 下生成 dist/（或其默认输出目录）。这里记录一下用于构建完成后的清理。
-        const rslibDefaultOutputPath = path.resolve(absModuleDir, "dist");
+        const { distRoot: rslibDefaultOutputPath } = await resolveDistRoot(
+          absModuleDir,
+          outputName,
+        );
 
         // 清理目标路径
         if (fs.existsSync(outputPath)) {

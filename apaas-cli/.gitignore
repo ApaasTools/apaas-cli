@@ -25,18 +25,3 @@ yarn-error.log*
 *.sln
 *.sw?
 *.zip
-apaas-custom-crmApaasProject.zip
-
-# build
-/apaas-custom-crmApaas*
-/apaas-custom-CRMtable*
-/apaas-custom-engineC*
-/apaas-custom-fileUploadT*
-/apaas-custom-widge*
-/apaas-custom-crmQueryBread*
-/apaas-custom-list-search*
-/apaas-custom-crmCustomPage*
-/apaas-custom-layout*
-
-
-/https
