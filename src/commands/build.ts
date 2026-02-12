@@ -14,7 +14,7 @@ import {
   readJsonFile,
   validateEntry,
   buildRslibArgs,
-  resolveDistRoot,
+  // resolveDistRoot,
 } from "../utils/apaasModule";
 
 function exitWithError(message: string): never {
@@ -103,10 +103,10 @@ export function registerBuildCommand(program: Command) {
         const outputPath = path.resolve(zipRoot, outputName);
         const outputZipPath = path.resolve(zipRoot, `${outputName}.zip`);
 
-        const { distRoot: rslibDefaultOutputPath } = await resolveDistRoot(
-          absModuleDir,
-          outputName,
-        );
+        // const { distRoot: rslibDefaultOutputPath } = await resolveDistRoot(
+        //   absModuleDir,
+        //   outputName
+        // );
 
         // 清理目标路径
         if (fs.existsSync(outputPath)) {
@@ -115,17 +115,23 @@ export function registerBuildCommand(program: Command) {
             : shelljs.rm(outputPath);
         }
 
+        const distRoot = path.resolve(
+          process.cwd(),
+          `zip/${apaasConfig.outputName}`
+        );
+
         // 设置环境变量并执行构建
         process.env.PUBLIC_ENTRY = entryAbsPath;
         process.env.PUBLIC_OUTPUT_NAME = outputName;
-
+        process.env.PUBLIC_OUTPUT_DIR = distRoot;
         // 执行构建（参考 scripts/build.cjs：npx rslib build ...）
         const args = buildRslibArgs({ moduleDir: absModuleDir });
         log.info(`构建命令: npx ${args.join(" ")}`);
         // 非 monorepo 场景下，rslib 安装在项目根目录 node_modules 中，
         // 这里仍使用 npx 调用，但通过 env 继承让其在整项目范围内解析依赖。
         // 如果后续需要进一步兼容全局安装或自定义路径，可以在此扩展。
-        spawnSync("npx", args, { cwd: absModuleDir });
+        const npxCmd = process.platform === "win32" ? "npx.cmd" : "npx";
+        spawnSync(npxCmd, args, { cwd: absModuleDir });
         log.success(`构建 ${outputName} 模块成功！`);
 
         // 统计构建产物大小
@@ -172,8 +178,8 @@ export function registerBuildCommand(program: Command) {
             shelljs.rm("-r", outputPath);
             // 2) 删除 rslib 在模块目录下产出的 dist（或默认输出），
             //    避免在自定义模块目录下残留构建产物目录
-            if (fs.existsSync(rslibDefaultOutputPath)) {
-              shelljs.rm("-r", rslibDefaultOutputPath);
+            if (fs.existsSync(distRoot)) {
+              shelljs.rm("-r", distRoot);
             }
           });
         });

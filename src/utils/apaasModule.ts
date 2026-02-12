@@ -1,7 +1,7 @@
-import fs from 'node:fs';
-import path from 'node:path';
+import fs from "node:fs";
+import path from "node:path";
 
-import { log } from './log';
+import { log } from "./log";
 
 export type ApaasJson = {
   entry: string;
@@ -29,18 +29,20 @@ export function readJsonFile<T>(filePath: string): T {
     throw new Error(`找不到配置文件：${filePath}`);
   }
   try {
-    return JSON.parse(fs.readFileSync(filePath, 'utf-8')) as T;
+    return JSON.parse(fs.readFileSync(filePath, "utf-8")) as T;
   } catch {
     throw new Error(`配置文件解析失败：${filePath}`);
   }
 }
 
 export function validateEntry(moduleDir: string, entry: string) {
-  const entryPath = path.isAbsolute(entry) ? entry : path.resolve(moduleDir, entry);
+  const entryPath = path.isAbsolute(entry)
+    ? entry
+    : path.resolve(moduleDir, entry);
 
   if (!fs.existsSync(entryPath)) {
     throw new Error(
-      `apaas.json 指定的 entry: ${entry} 的路径错误\nerror path is ${entryPath}`,
+      `apaas.json 指定的 entry: ${entry} 的路径错误\nerror path is ${entryPath}`
     );
   }
 
@@ -49,10 +51,10 @@ export function validateEntry(moduleDir: string, entry: string) {
 
 export function findRslibConfig(startDir: string) {
   const candidates = [
-    'rslib.config.ts',
-    'rslib.config.js',
-    'rslib.config.cjs',
-    'rslib.config.mjs',
+    "rslib.config.ts",
+    "rslib.config.js",
+    "rslib.config.cjs",
+    "rslib.config.mjs",
   ];
 
   let current = startDir;
@@ -78,61 +80,65 @@ export function findRslibConfig(startDir: string) {
 export type ResolvedDistRootResult = {
   distRoot: string;
   configPath: string | null;
-  from: 'rslibConfig' | 'moduleOutputNameDir' | 'cwdZipDir';
+  from: "rslibConfig" | "moduleOutputNameDir" | "cwdZipDir";
 };
 
-function fallbackDistRoot(moduleDir: string, outputName: string): ResolvedDistRootResult {
+function fallbackDistRoot(
+  moduleDir: string,
+  outputName: string
+): ResolvedDistRootResult {
   const candidate = path.resolve(moduleDir, outputName);
   if (fs.existsSync(candidate)) {
     return {
       distRoot: candidate,
       configPath: null,
-      from: 'moduleOutputNameDir',
+      from: "moduleOutputNameDir",
     };
   }
   return {
-    distRoot: path.resolve(process.cwd(), 'zip', outputName),
+    distRoot: path.resolve(process.cwd(), "zip", outputName),
     configPath: null,
-    from: 'cwdZipDir',
+    from: "cwdZipDir",
   };
 }
 
 export async function resolveDistRoot(
   moduleDir: string,
-  outputName: string,
+  outputName: string
 ): Promise<ResolvedDistRootResult> {
-  const configPath = findRslibConfig(moduleDir);
-  if (!configPath) {
-    log.warn('未找到 rslib.config.*，将回退到默认输出目录推导策略');
-    return fallbackDistRoot(moduleDir, outputName);
-  }
+  return fallbackDistRoot(moduleDir, outputName);
+  // const configPath = findRslibConfig(moduleDir);
+  // if (!configPath) {
+  //   log.warn('未找到 rslib.config.*，将回退到默认输出目录推导策略');
+  //   return fallbackDistRoot(moduleDir, outputName);
+  // }
 
-  try {
-    // 兼容 CJS 产物：避免 tsc 将 import() 降级为 require()
-    const mod = await eval(`import(${JSON.stringify(configPath)})`);
-    const cfg = (mod as any).default ?? mod;
-    const root = cfg?.output?.distPath?.root;
+  // try {
+  //   // 兼容 CJS 产物：避免 tsc 将 import() 降级为 require()
+  //   const mod = await eval(`import(${JSON.stringify(configPath)})`);
+  //   const cfg = (mod as any).default ?? mod;
+  //   const root = cfg?.output?.distPath?.root;
 
-    if (typeof root === 'string' && root.trim()) {
-      return {
-        distRoot: path.resolve(moduleDir, root),
-        configPath,
-        from: 'rslibConfig',
-      };
-    }
+  //   if (typeof root === 'string' && root.trim()) {
+  //     return {
+  //       distRoot: path.resolve(moduleDir, root),
+  //       configPath,
+  //       from: 'rslibConfig',
+  //     };
+  //   }
 
-    log.warn(
-      `rslib.config 中未找到 output.distPath.root（或不是字符串），将回退到默认输出目录推导策略\nconfig: ${configPath}`,
-    );
-    return fallbackDistRoot(moduleDir, outputName);
-  } catch (e) {
-    log.warn(
-      `读取 rslib.config 失败，将回退到默认输出目录推导策略\nconfig: ${configPath}\nerror: ${String(
-        e instanceof Error ? e.message : e,
-      )}`,
-    );
-    return fallbackDistRoot(moduleDir, outputName);
-  }
+  //   log.warn(
+  //     `rslib.config 中未找到 output.distPath.root（或不是字符串），将回退到默认输出目录推导策略\nconfig: ${configPath}`,
+  //   );
+  //   return fallbackDistRoot(moduleDir, outputName);
+  // } catch (e) {
+  //   log.warn(
+  //     `读取 rslib.config 失败，将回退到默认输出目录推导策略\nconfig: ${configPath}\nerror: ${String(
+  //       e instanceof Error ? e.message : e,
+  //     )}`,
+  //   );
+  //   return fallbackDistRoot(moduleDir, outputName);
+  // }
 }
 
 export function buildRslibArgs(params: {
@@ -141,15 +147,15 @@ export function buildRslibArgs(params: {
   forwardedArgs?: string[];
 }) {
   const { moduleDir, watch = false, forwardedArgs = [] } = params;
-  const args = ['rslib', 'build'];
+  const args = ["rslib", "build"];
 
   const configPath = findRslibConfig(moduleDir);
   if (configPath) {
-    args.push('-c', configPath);
+    args.push("-c", configPath);
   }
 
   if (watch) {
-    args.push('-w');
+    args.push("-w");
   }
 
   if (forwardedArgs.length > 0) {
@@ -158,4 +164,3 @@ export function buildRslibArgs(params: {
 
   return args;
 }
-
