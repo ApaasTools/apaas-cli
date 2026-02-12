@@ -130,12 +130,11 @@ async function startServer(params: {
   const clients = new Set<express.Response>();
 
   app.use(cors());
-  console.info("staticDir", staticDir);
   // 旧写法，为了兼容旧插件
   app.use(express.static(staticDir));
   // 新写法
-  app.use(`/app/${apaasConfig.outputName}/`, express.static(staticDir));
-  app.use(`/m/${apaasConfig.outputName}/`, express.static(staticDir));
+  // app.use(`/app/${apaasConfig.outputName}/`, express.static(staticDir));
+  // app.use(`/m/${apaasConfig.outputName}/`, express.static(staticDir));
 
   app.get("/sse", (req, res) => {
     res.writeHead(200, {
