@@ -56,7 +56,7 @@ export function registerInitCommand(program: Command) {
             { name: 'monorepo集合', value: 'monorepo' },
             { name: '普通项目', value: 'normal' },
           ],
-          default: 'normal',
+          default: 'monorepo',
         },
       ]);
 
@@ -91,8 +91,34 @@ export function registerInitCommand(program: Command) {
         ? `git clone --branch ${options.version} ${gitProjectUrl} --depth=1 ${gitTemplateRepo}`
         : `git clone ${gitProjectUrl} --depth=1 ${gitTemplateRepo}`;
 
-      const result = shelljs.exec(cloneCmd);
+      const result = shelljs.exec(cloneCmd, { silent: true });
       if (result.code !== 0) {
+        log.error('error 模板仓库克隆失败。');
+        log.error(`error 项目类型：${projectType}`);
+        log.error(`error 模板仓库：${gitProjectUrl}`);
+        if (options.version) {
+          log.error(`error 模板版本（分支/Tag）：${options.version}`);
+        }
+        log.error(`error 缓存目录：${gitTemplateRepo}`);
+        log.error('');
+        log.error('可能原因（常见）：');
+        log.error('1) 当前网络到 github.com 不稳定，导致 TLS/HTTP2 读取超时（curl 28 / errno 60）。');
+        log.error('2) 公司网络/网关/安全软件对 git 的长连接下载存在限制或丢包。');
+        log.error('3) git 配置了不可用的代理（http.proxy/https.proxy）。');
+        log.error('');
+        log.error('你可以尝试：');
+        log.error('A) 换网络（例如手机热点）后重试。');
+        log.error('B) 强制 git 使用 HTTP/1.1：git config --global http.version HTTP/1.1');
+        log.error('C) 检查/取消 git 代理：git config --global --get http.proxy && git config --global --get https.proxy');
+        log.error('D) 将模板仓库地址改为 SSH（推荐更稳定）：git@github.com:<org>/<repo>.git');
+        log.error('');
+        log.error('调试命令（可复制执行）：');
+        log.error(`GIT_CURL_VERBOSE=1 GIT_TRACE=1 git ls-remote ${gitProjectUrl} | cat`);
+        log.error('');
+        if (result.stderr) {
+          log.error('git 输出：');
+          log.error(result.stderr.trim());
+        }
         shelljs.exit(result.code);
       }
 

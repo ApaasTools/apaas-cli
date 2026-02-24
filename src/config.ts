@@ -15,10 +15,10 @@ const DEFAULT_CONFIG: ApaasConfig = {
   templates: {
     monorepo:
       process.env.APAAS_MONOREPO_TEMPLATE_GIT ||
-      'https://example.com/your-default-monorepo-template.git',
+      'https://github.com/ApaasTools/apaas-monorepo-template.git',
     normal:
       process.env.APAAS_NORMAL_TEMPLATE_GIT ||
-      'https://example.com/your-default-normal-template.git',
+      'https://github.com/ApaasTools/apaas-normal-template.git',
   },
 };
 
