@@ -53,8 +53,8 @@ export function registerInitCommand(program: Command) {
           message: '请选择将要创建的项目类型：',
           name: 'projectType',
           choices: [
-            { name: 'monorepo集合', value: 'monorepo' },
-            { name: '普通项目', value: 'normal' },
+            { name: 'monorepo集合（目前只提供此模版）', value: 'monorepo' },
+            // { name: '普通项目', value: 'normal' },
           ],
           default: 'monorepo',
         },
