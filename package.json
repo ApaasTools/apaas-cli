@@ -40,5 +40,10 @@
     "@types/shelljs": "^0.8.15",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.0"
+  },
+  "author": "xie392 <ymzdjiang@qq.com> (https://xie392.cn)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ApaasTools/apaas-cli.git"
   }
 }
