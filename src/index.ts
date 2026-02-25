@@ -9,13 +9,14 @@ import { registerSetCommand } from './commands/set';
 import { registerConfigCommand } from './commands/config';
 import { registerRunCommand } from './commands/run';
 import { outputWarning } from './utils/warning';
+import pkg from '../package.json'
 
 const program = new Command();
 
 program
   .name('apaas')
   .description('Apaas CLI')
-  .version('0.0.1')
+  .version(pkg.version)
   .usage('<command> [option]');
 
 registerInitCommand(program);
