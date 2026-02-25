@@ -1,5 +1,5 @@
 {
-  "name": "@apaas/cli",
+  "name": "apaas-cli",
   "version": "0.0.1",
   "description": "Apaas CLI",
   "private": false,
