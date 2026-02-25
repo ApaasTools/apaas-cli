@@ -16,6 +16,9 @@
     "apaas",
     "typescript"
   ],
+  "files": [
+    "dist"
+  ],
   "license": "MIT",
   "dependencies": {
     "chokidar": "^4.0.3",

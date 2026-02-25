@@ -1,6 +1,6 @@
-# @apaas/cli
+# apaas-cli
 
-`@apaas/cli` 是一款面向 APaaS 项目的命令行工具，提供：
+`apaas-cli` 是一款面向 APaaS 项目的命令行工具，提供：
 
 - 项目初始化
 - 自定义模块构建
@@ -17,11 +17,11 @@
 ### 全局安装（推荐）
 
 ```bash
-npm install -g @apaas/cli
+npm install -g apaas-cli
 # 或
-yarn global add @apaas/cli
+yarn global add apaas-cli
 # 或
-pnpm add -g @apaas/cli
+pnpm add -g apaas-cli
 ```
 
 安装完成后，即可使用命令：
@@ -55,7 +55,7 @@ Commands:
 ### 项目内安装（可选）
 
 ```bash
-npm install @apaas/cli --save-dev
+npm install apaas-cli --save-dev
 ```
 
 在 `package.json` 中添加脚本：
@@ -252,7 +252,7 @@ apaas-custom-my-module/
 
 ## 开发与调试（面向仓库维护者）
 
-如果你是 `@apaas/cli` 的维护者，或希望本地开发/调试 CLI：
+如果你是 `apaas-cli` 的维护者，或希望本地开发/调试 CLI：
 
 ```bash
 # 克隆仓库
@@ -306,10 +306,10 @@ npm start
    git tag vX.Y.Z
    git push origin vX.Y.Z
    ```
-4. GitHub Actions 会在工作流通过后，将新版本发布到 npm 包：`@apaas/cli`
+4. GitHub Actions 会在工作流通过后，将新版本发布到 npm 包：`apaas-cli`
 
 > **注意**：  
-> - 在 GitHub 仓库中需要提前配置好 `NPM_TOKEN`，且拥有发布 `@apaas/cli` 的权限。  
+> - 在 GitHub 仓库中需要提前配置好 `NPM_TOKEN`，且拥有发布 `apaas-cli` 的权限。  
 > - CI 工作流文件位于 `.github/workflows/*.yml`，具体触发条件和发布逻辑请以其中配置为准。
 
 ---
