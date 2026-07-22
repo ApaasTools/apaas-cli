@@ -38,6 +38,40 @@ function replaceInDirSync(dirPath: string, replacements: Array<[RegExp, string]>
   fs.writeFileSync(dirPath, content);
 }
 
+function updateAppsOutputName(projectPath: string, moduleName: string) {
+  const appsDir = path.resolve(projectPath, 'apps');
+  if (!fs.existsSync(appsDir) || !fs.statSync(appsDir).isDirectory()) {
+    return;
+  }
+
+  const prefix = 'apaas-custom-';
+  const newPrefix = `apaas-custom-${moduleName}-`;
+  const entries = fs.readdirSync(appsDir);
+  for (const entry of entries) {
+    const apaasJsonPath = path.resolve(appsDir, entry, 'apaas.json');
+    if (!fs.existsSync(apaasJsonPath) || !fs.statSync(apaasJsonPath).isFile()) {
+      continue;
+    }
+
+    let parsed: Record<string, unknown>;
+    try {
+      parsed = JSON.parse(fs.readFileSync(apaasJsonPath, 'utf-8'));
+    } catch {
+      continue;
+    }
+
+    const outputName = parsed.outputName;
+    if (
+      typeof outputName === 'string' &&
+      outputName.startsWith(prefix) &&
+      !outputName.startsWith(newPrefix)
+    ) {
+      parsed.outputName = newPrefix + outputName.slice(prefix.length);
+      fs.writeFileSync(apaasJsonPath, JSON.stringify(parsed, null, 2), 'utf-8');
+    }
+  }
+}
+
 export function registerInitCommand(program: Command) {
   program
     .command('init <name>')
@@ -130,6 +164,8 @@ export function registerInitCommand(program: Command) {
       }
 
       shelljs.cp('-R', `${gitTemplateRepo}/.`, projectPath);
+
+      updateAppsOutputName(projectPath, moduleName);
 
       const demoCustomModuleName = 'hello';
       const demoCustomModulePath = path.resolve(
